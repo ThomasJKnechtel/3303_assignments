@@ -58,7 +58,7 @@ public class Host {
 	    	
 	    	clientReadRequest(clientAddress, clientPort);	//updates fields and sends response when there's data to be sent
 	    
-	    }else if(dataFromClient[0]==0&&dataFromClient[1]==1) {	//write request from client
+	    }else if(dataFromClient[0]==0&&dataFromClient[1]==2) {	//write request from client
 	    	
 	    	DatagramPacket response = new DatagramPacket(new byte[] {0,2,0,2} , 4,clientAddress,clientPort);	//packet contains a HTTP 0202 Request Accepted but not acted upon i.e. server hasn't handled it yet
 	    	 try {
@@ -117,7 +117,7 @@ public class Host {
 		 dataToServer=dataFromClient;
 		 datatoServerFull=true;
 		
-		
+		notifyAll();
 	 }
 	 /**
 	  * Receives packet from server, sends the data to server recei
@@ -133,21 +133,60 @@ public class Host {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		 System.out.println("Server: Packet received:");
-		 System.out.print("Containing: ");
-		    
-		System.out.println("Byte Array:"+Arrays.toString(dataFromClient));
+		System.out.println("Server: Packet received:");
+		System.out.print("Containing: ");
+		System.out.println("Byte Array:"+Arrays.toString(dataFromServer));
 		 
+		InetAddress serverAddress = receivePacket.getAddress();
+		int serverPort = receivePacket.getPort();
+		
+		if(dataFromServer[0]==0&&dataFromServer[1]==1) {	//read request from server
+		    	
+		    //updates fields and sends response when there's data to be sent
+		    
+		 }else{	//write request from server
+		    	
+		    	DatagramPacket response = new DatagramPacket(new byte[] {0,2,0,2} , 4,serverAddress,serverPort);	//packet contains a HTTP 0202 Request Accepted but not acted upon i.e. server hasn't handled it yet
+		    	 try {
+		 			recieveAndSendClientSocket.send(response);
+		 		} catch (IOException e) {
+		 			e.printStackTrace();
+		 			System.exit(1);
+		 		}
+		    	//updates fields when previous data has been sent to server
+		    
+		    }
+	 }
+	 /**
+	  * Waits for dataToServer to be full before sending data back to server and updating fields
+	  * @param address the address of server
+	  * @param port the port of server
+	  */
+	 private synchronized void readRequestServer(InetAddress address, int port) {
+		 
+		 while(!datatoServerFull) {	//wait for there to be data in dataToServer to send
+			 try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		 }
+		 DatagramPacket response = new DatagramPacket(dataToServer, dataToServer.length, address, port);
+		 try {
+			receiveAndSendServerSocket.send(response);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		dataToServer=null;
+		datatoServerFull=false;	//data was sent so no longer full. Notify blocked methods that lock is released.
+		notifyAll();
 	 }
 	 public static void main(String[] args) {
 		 Host host = new Host();
 		 while(true) {
-			 try {
-				host.sendAndReceive(InetAddress.getLocalHost(),69);
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
+			
 		 }
 	 }
 }
