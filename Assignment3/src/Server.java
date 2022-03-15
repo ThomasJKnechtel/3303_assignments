@@ -1,17 +1,24 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 
 public class Server {
-	private DatagramPacket send, receive;
-	private DatagramSocket sendSocket, receiveSocket;
+
+	private DatagramSocket sendAndReceiveSocket;
+	
+	private byte[] hostData = new byte[100];
+	private boolean isRead=false;
+	private boolean isWrite=false;
+	private byte sendData[]=null;
+	
 	public Server() {
 		
 		try {
-			sendSocket=new DatagramSocket();
-			receiveSocket=new DatagramSocket(69);
+			sendAndReceiveSocket=new DatagramSocket(29);
 		} catch (SocketException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -21,24 +28,23 @@ public class Server {
 	 * receives packet from host check if request is valid and send response to host
 	 * @throws Exception Throws exception if the request is invalid
 	 */
-	public void sendRecieve() throws Exception {
+	public void read() {
 		
-		byte[] hostData = new byte[100];
-		boolean isRead=false;
-		boolean isWrite=false;
-		byte sendData[]=null;
-		
-		receive= new DatagramPacket(hostData, hostData.length);
-		
+		byte[] readRequest = new byte[] {0,1};
+		DatagramPacket sendPacket=null;
 		try {
-			receiveSocket.receive(receive);
+			sendPacket = new DatagramPacket(readRequest, 2, InetAddress.getLocalHost(),29);
+			sendAndReceiveSocket.send(sendPacket);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			System.exit(1);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		System.out.print("Recieved: ");
-		System.out.println(DataParser.parseRequest(hostData));
-		System.out.println(Arrays.toString(hostData));
+		
+		
+		
 		if(hostData[0]==0 && hostData[1]==1) {	//read request
 			isRead=true; 
 			isWrite=false;
@@ -74,12 +80,20 @@ public class Server {
 			throw(new Exception("Invalid Input: not enough arguments"));
 		}else if(!isRead&&!isWrite) throw( new Exception("Invalid Input: not a read or write request"));
 		
+		
+		
+	}
+	/**
+	 * create write request for server, send it and wait for response
+	 * @throws Exception if Invalid input
+	 */
+	public void write() throws Exception{
+		
+		
 		send = new DatagramPacket(sendData, sendData.length, receive.getAddress(), receive.getPort());
 		System.out.print("Sent: ");
 		System.out.println(Arrays.toString(send.getData()));
-		sendSocket.send(send);
-		
-		
+		sendAndReceiveSocket.send(send);
 	}
 	public static void main(String[] args) {
 		Server server = new Server();
