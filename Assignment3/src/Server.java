@@ -18,14 +18,14 @@ public class Server implements Runnable{
 	public Server() {
 		
 		try {
-			sendAndReceiveSocket=new DatagramSocket(29);
+			sendAndReceiveSocket=new DatagramSocket();
 		} catch (SocketException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 	}
 	/**
-	 * receives packet from host check if request is valid and send response to host
+	 * receives packet from host check if request is valid 
 	 * @throws Exception Throws exception if the request is invalid
 	 */
 	public void read() throws Exception{
@@ -45,7 +45,7 @@ public class Server implements Runnable{
 			e.printStackTrace();
 			System.exit(1);
 		}
-		System.out.println(hostData);
+		System.out.println("Data from host: "+DataParser.parseRequest(hostData));
 		
 		
 		if(hostData[0]==0 && hostData[1]==1) {	//read request
@@ -94,10 +94,12 @@ public class Server implements Runnable{
 		
 		
 		DatagramPacket send, response;
+		byte[] hostResponse = new byte[4];
+		response=null;
 		try {
 			send = new DatagramPacket(sendData, sendData.length, InetAddress.getLocalHost(), 29);
 			sendAndReceiveSocket.send(send);
-			response=new DatagramPacket(hostData,hostData.length);
+			response=new DatagramPacket(hostResponse, hostResponse.length);
 			sendAndReceiveSocket.receive(response);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -107,7 +109,7 @@ public class Server implements Runnable{
 			System.exit(1);
 		}
 		
-		System.out.println(Arrays.toString(hostData));
+		System.out.println("Response from host: "+Arrays.toString(hostResponse));
 		
 	}
 	public static void main(String[] args) {

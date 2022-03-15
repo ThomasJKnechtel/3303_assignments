@@ -48,17 +48,16 @@ public class Host {
 	          System.exit(1);
 		}
 	    //print out received packet info
-	    System.out.println("Client: Packet received:");
-	    System.out.print("Containing: ");
-	    System.out.println("Byte Array:"+Arrays.toString(dataFromClient));
+	    System.out.println("Host received client packet:");
 	    
 	     clientPort=receivePacket.getPort();
 	    clientAddress=receivePacket.getAddress(); //the port and address the request was from.
 	    if(dataFromClient[0]==0&&dataFromClient[1]==1) {	//read request from client
-	    	
+	    	System.out.println(Arrays.toString(dataFromClient));
 	    	clientReadRequest(clientAddress, clientPort);	//updates fields and sends response when there's data to be sent
 	    
 	    }else if(dataFromClient[0]==0&&dataFromClient[1]==2) {	//write request from client
+	    	System.out.println(DataParser.parseRequest(dataFromClient));
 	    	
 	    	DatagramPacket response = new DatagramPacket(new byte[] {0,2,0,2} , 4,clientAddress,clientPort);	//packet contains a HTTP 0202 Request Accepted but not acted upon i.e. server hasn't handled it yet
 	    	 try {
@@ -79,7 +78,6 @@ public class Host {
 	  * @param port: the port of the client request
 	  */
 	 private synchronized void clientReadRequest(InetAddress address, int port) {
-		
 		 while(!dataToClientFull) {	//wait for data available to be read to client
 			 try {
 				wait();
@@ -89,6 +87,7 @@ public class Host {
 			}
 		 }
 		 DatagramPacket response = new DatagramPacket(dataToClient, dataToClient.length, address, port);
+		 System.out.println("");
 		 try {
 			receiveAndSendServerSocket.send(response);
 		} catch (IOException e) {

@@ -53,7 +53,7 @@ public class Client {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       
       try {
-		stream.write(new byte[] {2,0});	//write request status code
+		stream.write(new byte[] {0,2});	//write request status code
 		stream.write( 0);	
 		stream.write(fName.getBytes());	//file name
 		stream.write(0);
@@ -89,7 +89,7 @@ public class Client {
       }
 
       // Process the received datagram.
-      System.out.println("Client: Packet received:");
+      System.out.println("Client Write Response:");
       System.out.println(Arrays.toString(data));
    }
    /**
@@ -110,7 +110,7 @@ public class Client {
 			e.printStackTrace();
 			System.exit(1);
 		}
-	   System.out.println(Arrays.toString(response));
+	   System.out.println("Client Read Response from Server: "+Arrays.toString(response));
 	   
    }
    /**
