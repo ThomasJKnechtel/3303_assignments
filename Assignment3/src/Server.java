@@ -112,6 +112,8 @@ public class Server implements Runnable{
 	}
 	public static void main(String[] args) {
 		Server server = new Server();
+		Thread monitorHost = new Thread(server);
+		monitorHost.start();
 		
 	}
 	@Override
