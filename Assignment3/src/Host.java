@@ -202,8 +202,31 @@ public class Host {
 	 }
 	 public static void main(String[] args) {
 		 Host host = new Host();
-		 while(true) {
+		 Thread monitorClient = new Thread(new Runnable() {	//monitor client socket for requests and handle them
 			
-		 }
+			@Override
+			public void run() {
+				while(true) {
+					host.sendAndReceiveClient();
+				}
+				
+				
+			}
+		});
+		 Thread monitorServer = new Thread(new Runnable() {	//monitor server socket for requests and handle them
+			
+			@Override
+			public void run() {
+				while(true) {
+					host.sendAndReceiveServer();
+				}
+				
+				
+			}
+		});
+		
+		monitorClient.start();
+		monitorServer.start();	//begin monitoring server and client
+		 
 	 }
 }
