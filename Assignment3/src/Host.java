@@ -142,18 +142,18 @@ public class Host {
 		
 		if(dataFromServer[0]==0&&dataFromServer[1]==1) {	//read request from server
 		    	
-		    //updates fields and sends response when there's data to be sent
+		    readRequestServer(serverAddress, serverPort);//updates fields and sends response when there's data to be sent
 		    
 		 }else{	//write request from server
 		    	
-		    	DatagramPacket response = new DatagramPacket(new byte[] {0,2,0,2} , 4,serverAddress,serverPort);	//packet contains a HTTP 0202 Request Accepted but not acted upon i.e. server hasn't handled it yet
+		    	DatagramPacket response = new DatagramPacket(new byte[] {0,2,0,2} , 4,serverAddress,serverPort);	//packet contains a HTTP 0202 Request Accepted but not acted upon i.e. client hasn't read it yet
 		    	 try {
 		 			recieveAndSendClientSocket.send(response);
 		 		} catch (IOException e) {
 		 			e.printStackTrace();
 		 			System.exit(1);
 		 		}
-		    	//updates fields when previous data has been sent to server
+		    	writeRequestServer(dataFromServer);//updates fields when previous data has been sent to server
 		    
 		    }
 	 }
@@ -182,6 +182,23 @@ public class Host {
 		dataToServer=null;
 		datatoServerFull=false;	//data was sent so no longer full. Notify blocked methods that lock is released.
 		notifyAll();
+	 }
+	 /**
+	  * When data can be written to dataToClient, update fields for it. 
+	  * @param dataFromServer the data from server
+	  */
+	 private synchronized void writeRequestServer(byte[] dataFromServer) {
+		 while(dataToClientFull) {	//wait for previous data to be sent to client to send
+			 try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		 }
+		 dataToClient=dataFromServer;
+		 dataToClientFull=true;
+		 notifyAll();
 	 }
 	 public static void main(String[] args) {
 		 Host host = new Host();
