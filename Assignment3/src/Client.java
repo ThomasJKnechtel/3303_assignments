@@ -42,7 +42,7 @@ public class Client {
     * @param fName name of the file
     * @param mode the type of file: netascii or octet
     * @param hostAddress the address of the host server
-    * @param hostPort the port of the Server process
+    * @param hostPort the port of the port process
     */
    public void write(String fName, Mode mode, InetAddress hostAddress, int hostPort)
    {
@@ -91,6 +91,27 @@ public class Client {
       // Process the received datagram.
       System.out.println("Client: Packet received:");
       System.out.println(Arrays.toString(data));
+   }
+   /**
+    * sends Read request to host and waits for respoonse
+    * @param address the address of host
+    * @param port the port of host
+    */
+   public void read(InetAddress address, int port) {
+	   byte[] readRequest = new byte[] {0,1};
+	   byte[] response = new byte[4];
+	   
+	   DatagramPacket sendPacket = new DatagramPacket(readRequest, 2, address,port );
+	   try {
+		sendReceiveSocket.send(sendPacket);
+		receivePacket=new DatagramPacket(response,response.length);
+		sendReceiveSocket.receive(receivePacket);
+	   }catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+	   System.out.println(Arrays.toString(response));
+	   
    }
    /**
     * closes the Clients sockets
