@@ -37,14 +37,14 @@ public class Client {
       }
    }
    /**
-    * sends request to host and waits for response
+    * sends write request to host and waits for response
     * @param readwrite byte array 01 is read 02 is write
     * @param fName name of the file
     * @param mode the type of file: netascii or octet
     * @param hostAddress the address of the host server
     * @param hostPort the port of the Server process
     */
-   public void sendAndReceive(byte[] readwrite, String fName, Mode mode, InetAddress hostAddress, int hostPort)
+   public void write(String fName, Mode mode, InetAddress hostAddress, int hostPort)
    {
       byte request[];
       byte msg[] = null;
@@ -53,19 +53,17 @@ public class Client {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       
       try {
-		stream.write(readwrite);
-		stream.write( 0);
-		stream.write(fName.getBytes());
+		stream.write(new byte[] {2,0});	//write request status code
+		stream.write( 0);	
+		stream.write(fName.getBytes());	//file name
 		stream.write(0);
-		stream.write(mode.toString().getBytes());
+		stream.write(mode.toString().getBytes());	//mode
 		stream.write(0);
-		msg=stream.toByteArray();
+		msg=stream.toByteArray();	//message to be sent
 	} catch (IOException e1) {
-		// TODO Auto-generated catch block
 		e1.printStackTrace();
+		System.exit(1);
 	}
-      
-      
       
       sendPacket = new DatagramPacket(msg, msg.length,  hostAddress, hostPort);
       
@@ -74,12 +72,12 @@ public class Client {
       System.out.println(Arrays.toString(packetData));
       System.out.println(DataParser.parseRequest(packetData));
       try {
-          sendReceiveSocket.send(sendPacket);
+          sendReceiveSocket.send(sendPacket);	//send packet to host
        } catch (IOException e) {
           e.printStackTrace();
           System.exit(1);
        }
-      byte data[] = new byte[100];
+      byte data[] = new byte[4];	//status code response
       receivePacket = new DatagramPacket(data, data.length);
 
       try {
@@ -93,10 +91,6 @@ public class Client {
       // Process the received datagram.
       System.out.println("Client: Packet received:");
       System.out.println(Arrays.toString(data));
-
-      
-      
-      
    }
    /**
     * closes the Clients sockets
@@ -113,9 +107,9 @@ public class Client {
     	  for(int i=0; i<5; i++) {	//valid request
     	
     	 
-    		  c.sendAndReceive(new byte[] {0,1}, "test.txt",Client.Mode.netascii, InetAddress.getLocalHost(), 23);
+    		  c.sendAndReceive(new byte[] {0,2}, "test.txt",Client.Mode.netascii, InetAddress.getLocalHost(), 23);	//write request
 		
-    		  c.sendAndReceive(new byte[] {0,2}, "test2.txt", Client.Mode.octet, InetAddress.getLocalHost(), 23);
+    		  c.sendAndReceive(new byte[] {0,1}, "test2.txt", Client.Mode.octet, InetAddress.getLocalHost(), 23);	//read request
     	  }
     	  c.sendAndReceive(new byte[] {3,2}, "invalid.txt", Client.Mode.netascii, InetAddress.getLocalHost(), 23);	//invalid request
       } catch (UnknownHostException e) {

@@ -6,7 +6,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-public class Server {
+public class Server implements Runnable{
 
 	private DatagramSocket sendAndReceiveSocket;
 	
@@ -28,13 +28,16 @@ public class Server {
 	 * receives packet from host check if request is valid and send response to host
 	 * @throws Exception Throws exception if the request is invalid
 	 */
-	public void read() {
+	public void read() throws Exception{
 		
 		byte[] readRequest = new byte[] {0,1};
 		DatagramPacket sendPacket=null;
+		DatagramPacket responsePacket = null;
 		try {
 			sendPacket = new DatagramPacket(readRequest, 2, InetAddress.getLocalHost(),29);
 			sendAndReceiveSocket.send(sendPacket);
+			responsePacket = new DatagramPacket(hostData, hostData.length);
+			sendAndReceiveSocket.receive(responsePacket);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -42,7 +45,7 @@ public class Server {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
+		System.out.println(hostData);
 		
 		
 		if(hostData[0]==0 && hostData[1]==1) {	//read request
@@ -87,24 +90,42 @@ public class Server {
 	 * create write request for server, send it and wait for response
 	 * @throws Exception if Invalid input
 	 */
-	public void write() throws Exception{
+	public void write(){
 		
 		
-		send = new DatagramPacket(sendData, sendData.length, receive.getAddress(), receive.getPort());
-		System.out.print("Sent: ");
-		System.out.println(Arrays.toString(send.getData()));
-		sendAndReceiveSocket.send(send);
+		DatagramPacket send, response;
+		try {
+			send = new DatagramPacket(sendData, sendData.length, InetAddress.getLocalHost(), 29);
+			sendAndReceiveSocket.send(send);
+			response=new DatagramPacket(hostData,hostData.length);
+			sendAndReceiveSocket.receive(response);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		System.out.println(Arrays.toString(hostData));
+		
 	}
 	public static void main(String[] args) {
 		Server server = new Server();
-		while(true) {
+		
+	}
+	@Override
+	public void run() {
+		while(true) {	//send read and write requests to host
 			try {
-				server.sendRecieve();
+				read();
 			} catch (Exception e) {
-				e.printStackTrace();
 				System.exit(1);
+				e.printStackTrace();
 			}
+			write();
 		}
+		
 	}
 	
 }
