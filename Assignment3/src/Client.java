@@ -93,7 +93,7 @@ public class Client {
       System.out.println(Arrays.toString(data));
    }
    /**
-    * sends Read request to host and waits for respoonse
+    * sends Read request to host and waits for response
     * @param address the address of host
     * @param port the port of host
     */
@@ -128,11 +128,11 @@ public class Client {
     	  for(int i=0; i<5; i++) {	//valid request
     	
     	 
-    		  c.sendAndReceive(new byte[] {0,2}, "test.txt",Client.Mode.netascii, InetAddress.getLocalHost(), 23);	//write request
+    		  c.write( "test.txt",Client.Mode.netascii, InetAddress.getLocalHost(), 23);	//write request
 		
-    		  c.sendAndReceive(new byte[] {0,1}, "test2.txt", Client.Mode.octet, InetAddress.getLocalHost(), 23);	//read request
+    		  c.read(  InetAddress.getLocalHost(), 23);	//read request
     	  }
-    	  c.sendAndReceive(new byte[] {3,2}, "invalid.txt", Client.Mode.netascii, InetAddress.getLocalHost(), 23);	//invalid request
+    	 
       } catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
