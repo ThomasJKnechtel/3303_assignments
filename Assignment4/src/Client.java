@@ -55,7 +55,7 @@ public class Client {
       try {
 		stream.write(new byte[] {0,2});	//write request status code
 		stream.write( 0);	
-		stream.write(fName.getBytes());	//file name
+		stream.write(fName.getBytes(),3,1000);	//1000 bit file name
 		stream.write(0);
 		stream.write(mode.toString().getBytes());	//mode
 		stream.write(0);
@@ -68,9 +68,7 @@ public class Client {
       sendPacket = new DatagramPacket(msg, msg.length,  hostAddress, hostPort);
       
       byte packetData[] = sendPacket.getData();
-      System.out.print("Sent:");
-      System.out.println(Arrays.toString(packetData));
-      System.out.println(DataParser.parseRequest(packetData));
+    
       try {
           sendReceiveSocket.send(sendPacket);	//send packet to host
        } catch (IOException e) {
@@ -88,9 +86,7 @@ public class Client {
          System.exit(1);
       }
 
-      // Process the received datagram.
-      System.out.println("Client Write Response:");
-      System.out.println(Arrays.toString(data));
+     
    }
    /**
     * sends Read request to host and waits for response
@@ -110,7 +106,7 @@ public class Client {
 			e.printStackTrace();
 			System.exit(1);
 		}
-	   System.out.println("Client Read Response from Server: "+Arrays.toString(response));
+	
 	   
    }
    /**
@@ -125,7 +121,7 @@ public class Client {
 	  
       Client c = new Client();
       try {
-    	  for(int i=0; i<5; i++) {	//valid request
+    	  for(int i=0; i<500; i++) {	//valid request
     	
     	 
     		  c.write( "test.txt",Client.Mode.netascii, InetAddress.getLocalHost(), 23);	//write request

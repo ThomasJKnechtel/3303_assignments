@@ -10,7 +10,7 @@ public class Server implements Runnable{
 
 	private DatagramSocket sendAndReceiveSocket;
 	
-	private byte[] hostData = new byte[100];
+	private byte[] hostData = new byte[1020];
 	private boolean isRead=false;
 	private boolean isWrite=false;
 	private byte sendData[]=null;
@@ -45,9 +45,7 @@ public class Server implements Runnable{
 			e.printStackTrace();
 			System.exit(1);
 		}
-		System.out.println("Data from host: "+DataParser.parseRequest(hostData));
-		
-		
+	
 		if(hostData[0]==0 && hostData[1]==1) {	//read request
 			isRead=true; 
 			isWrite=false;
@@ -108,9 +106,7 @@ public class Server implements Runnable{
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
-		System.out.println("Response from host: "+Arrays.toString(hostResponse));
-		
+				
 	}
 	public static void main(String[] args) {
 		Server server = new Server();
