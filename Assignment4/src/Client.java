@@ -7,6 +7,7 @@
 import java.io.*;
 import java.lang.reflect.Array;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -19,6 +20,7 @@ public class Client {
 	
    DatagramPacket sendPacket, receivePacket;
    DatagramSocket sendReceiveSocket;
+   static DatagramSocket socket;
    
    static enum Mode{
 	   netascii,
@@ -31,6 +33,7 @@ public class Client {
    {
       try {
          sendReceiveSocket = new DatagramSocket();
+         socket = new DatagramSocket();
       } catch (SocketException se) {   // Can't create the socket.
          se.printStackTrace();
          System.exit(1);
@@ -50,12 +53,13 @@ public class Client {
       byte msg[] = null;
       
       
-      ByteArrayOutputStream stream = new ByteArrayOutputStream();
+      ByteArrayOutputStream stream = new ByteArrayOutputStream(1020);
       
       try {
 		stream.write(new byte[] {0,2});	//write request status code
 		stream.write( 0);	
-		stream.write(fName.getBytes(),3,1000);	//1000 bit file name
+		byte[] fileBytes = ByteBuffer.allocate(1000).put(fName.getBytes()).array();
+		stream.write(fileBytes);	//1000 bit file name
 		stream.write(0);
 		stream.write(mode.toString().getBytes());	//mode
 		stream.write(0);
@@ -121,19 +125,26 @@ public class Client {
 	  
       Client c = new Client();
       try {
+    	  int n=0;
     	  for(int i=0; i<500; i++) {	//valid request
     	
     	 
     		  c.write( "test.txt",Client.Mode.netascii, InetAddress.getLocalHost(), 23);	//write request
 		
     		  c.read(  InetAddress.getLocalHost(), 23);	//read request
+    		 
     	  }
+    	 DatagramPacket terminatePacket = new DatagramPacket(new byte[] {0,3}, 2, InetAddress.getLocalHost(), 23);
+    	 socket.send(terminatePacket);	//send request to terminate host
     	 
       } catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			c.closeSocket();
 			System.exit(1);
+      } catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	}
     c.closeSocket();
    }

@@ -1,4 +1,5 @@
 import java.io.ByteArrayOutputStream;
+import java.lang.System;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,6 +17,8 @@ public class Host {
 	
 	private byte[] dataToServer, dataToClient;
 	private boolean datatoServerFull, dataToClientFull;
+	
+	static boolean terminate = false;
 	public Host() {
 		try {
 			recieveAndSendClientSocket=new DatagramSocket(23);
@@ -62,6 +65,9 @@ public class Host {
 	 		}
 	    	clientWriteRequest(dataFromClient);	//updates fields when previous data has been sent to server
 	    
+	    }else if(dataFromClient[0]==0&&dataFromClient[1]==3) {	//termination request
+	    	clientWriteRequest(dataFromClient);
+	    	terminate=true;
 	    }
 	   
 	   
@@ -194,7 +200,9 @@ public class Host {
 			
 			@Override
 			public void run() {
-				while(true) {
+				long startTime = System.nanoTime();
+				while(!terminate) {
+					
 					host.sendAndReceiveClient();
 				}
 				
@@ -205,7 +213,7 @@ public class Host {
 			
 			@Override
 			public void run() {
-				while(true) {
+				while(!terminate) {
 					host.sendAndReceiveServer();
 				}
 				

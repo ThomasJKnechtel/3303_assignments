@@ -60,26 +60,7 @@ public class Server implements Runnable{
 		int zeroCount=0;
 		boolean prevByteZero = false;
 		
-		for(int i=2; i<hostData.length; i++) {
-			if(hostData[i]==0) {
-				if(prevByteZero&&zeroCount<2) { // two zeros in a row and not enough arguments
-					throw(new Exception("Invalid Input: not enough arguments"));
-					
-				}
-				zeroCount++;
-				prevByteZero=true;
-			}
-			else if(prevByteZero&&zeroCount>2){ // if not zero and is fourth argument
-				throw(new Exception("Invalid Input: too many arguments"));
-			}
-			else {
-				prevByteZero=false; //if not zero and valid
-			}
-			
-		}
-		if(zeroCount<2) {
-			throw(new Exception("Invalid Input: not enough arguments"));
-		}else if(!isRead&&!isWrite) throw( new Exception("Invalid Input: not a read or write request"));
+		if(!isRead&&!isWrite) throw( new Exception("Invalid Input: not a read or write request"));
 		
 		
 		
