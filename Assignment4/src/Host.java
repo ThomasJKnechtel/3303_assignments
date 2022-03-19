@@ -19,6 +19,7 @@ public class Host {
 	private boolean datatoServerFull, dataToClientFull;
 	
 	static boolean terminate = false;
+	
 	public Host() {
 		try {
 			recieveAndSendClientSocket=new DatagramSocket(23);
@@ -194,35 +195,43 @@ public class Host {
 		 dataToClientFull=true;
 		 notifyAll();
 	 }
-	 public static void main(String[] args) {
-		 Host host = new Host();
+	 /**
+	  * begin monitoring client for requests
+	  */
+	 public void monitorClient() {
 		 Thread monitorClient = new Thread(new Runnable() {	//monitor client socket for requests and handle them
-			
-			@Override
-			public void run() {
-				long startTime = System.nanoTime();
-				while(!terminate) {
+				
+				@Override
+				public void run() {
+					long startTime = System.nanoTime();
+					while(!terminate) {
+						
+						sendAndReceiveClient();
+					}
+					long finishTime = System.nanoTime();
+					System.out.println(finishTime-startTime);
 					
-					host.sendAndReceiveClient();
 				}
-				
-				
-			}
-		});
+			});
+		 monitorClient.start();
+	 }
+	 /**
+	  * begin monitoring server for requests
+	  */
+	 public void monitorServer() {
+		 
 		 Thread monitorServer = new Thread(new Runnable() {	//monitor server socket for requests and handle them
 			
 			@Override
 			public void run() {
 				while(!terminate) {
-					host.sendAndReceiveServer();
+					sendAndReceiveServer();
 				}
 				
 				
 			}
 		});
-		
-		monitorClient.start();
-		monitorServer.start();	//begin monitoring server and client
-		 
+		monitorServer.start();
 	 }
+	
 }

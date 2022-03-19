@@ -124,8 +124,16 @@ public class Client {
    {  
 	  
       Client c = new Client();
+
+		Server server = new Server();
+		Host host = new Host();
+		
+		Thread thread1 = new Thread(server);
+		thread1.start();
+		host.monitorClient();
+		host.monitorServer();
+		
       try {
-    	  int n=0;
     	  for(int i=0; i<500; i++) {	//valid request
     	
     	 
