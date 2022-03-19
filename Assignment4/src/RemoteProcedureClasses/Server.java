@@ -1,3 +1,4 @@
+package RemoteProcedureClasses;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -11,10 +12,9 @@ public class Server implements Runnable{
 	private DatagramSocket sendAndReceiveSocket;
 	
 	private byte[] hostData = new byte[1020];
-	private boolean isRead=false;
-	private boolean isWrite=false;
 	private byte sendData[]=null;
 	
+	private boolean terminate= false;
 	public Server() {
 		
 		try {
@@ -31,8 +31,12 @@ public class Server implements Runnable{
 	public void read() throws Exception{
 		
 		byte[] readRequest = new byte[] {0,1};
+		boolean isRead=false;
+		boolean isWrite=false;
+		
 		DatagramPacket sendPacket=null;
 		DatagramPacket responsePacket = null;
+		
 		try {
 			sendPacket = new DatagramPacket(readRequest, 2, InetAddress.getLocalHost(),29);
 			sendAndReceiveSocket.send(sendPacket);
@@ -56,11 +60,14 @@ public class Server implements Runnable{
 			isWrite=false;
 			sendData=new byte[] {0,4,0,0};
 		}
-		
 		int zeroCount=0;
 		boolean prevByteZero = false;
 		
-		if(!isRead&&!isWrite) throw( new Exception("Invalid Input: not a read or write request"));
+		if(!isRead&&!isWrite) {
+			terminate=true;
+			//throw( new Exception("Invalid Input: not a read or write request"));
+			
+		}
 		
 		
 		
@@ -89,21 +96,17 @@ public class Server implements Runnable{
 		}
 				
 	}
-	public static void main(String[] args) {
-		Server server = new Server();
-		Thread monitorHost = new Thread(server);
-		monitorHost.start();
-		
-	}
+
 	@Override
 	public void run() {
 		while(true) {	//send read and write requests to host
 			try {
 				read();
 			} catch (Exception e) {
-				System.exit(1);
+				System.exit(0);
 				e.printStackTrace();
 			}
+			if(terminate)break;
 			write();
 		}
 		

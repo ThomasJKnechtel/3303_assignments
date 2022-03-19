@@ -1,3 +1,4 @@
+package RemoteProcedureClasses;
 // SimpleEchoClient.java
 // This class is the client side for a simple echo server based on
 // UDP/IP. The client sends a character string to the echo server, then waits 
@@ -120,21 +121,14 @@ public class Client {
 	   sendReceiveSocket.close();
    }
 
-   public static void main(String args[])
+  public void sendRequests()
    {  
 	  
       Client c = new Client();
 
-		Server server = new Server();
-		Host host = new Host();
-		
-		Thread thread1 = new Thread(server);
-		thread1.start();
-		host.monitorClient();
-		host.monitorServer();
-		
+	
       try {
-    	  for(int i=0; i<500; i++) {	//valid request
+    	  for(int i=0; i<1000; i++) {	//valid request
     	
     	 
     		  c.write( "test.txt",Client.Mode.netascii, InetAddress.getLocalHost(), 23);	//write request

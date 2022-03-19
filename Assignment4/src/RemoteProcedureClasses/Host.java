@@ -1,5 +1,11 @@
+package RemoteProcedureClasses;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.lang.System;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -12,6 +18,7 @@ import java.util.Formatter;
 
 
 public class Host {
+	private ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
 	private DatagramSocket recieveAndSendClientSocket;
 	private DatagramSocket receiveAndSendServerSocket;
 	
@@ -207,13 +214,18 @@ public class Host {
 					while(!terminate) {
 						
 						sendAndReceiveClient();
+						
 					}
 					long finishTime = System.nanoTime();
-					System.out.println(finishTime-startTime);
-					
+					Long time = threadMxBean.getCurrentThreadCpuTime();
+					System.out.println(Thread.currentThread().getName()+" Run Time "+(finishTime-startTime));
+					System.out.println(Thread.currentThread().getName()+" CPU time: "+time);
+					updateTextFile(time, finishTime-startTime,"src/RemoteProcedureClasses/Monitor_Client_CPU_Time.txt", "src/RemoteProcedureClasses/Monitor_Client_RUN_Time.txt");
 				}
 			});
+		 monitorClient.setName("Host_MonitorClient_Thread");
 		 monitorClient.start();
+		
 	 }
 	 /**
 	  * begin monitoring server for requests
@@ -224,14 +236,40 @@ public class Host {
 			
 			@Override
 			public void run() {
+				long startTime = System.nanoTime();
 				while(!terminate) {
 					sendAndReceiveServer();
+					
 				}
+				long finishTime = System.nanoTime();
+				Long time = threadMxBean.getCurrentThreadCpuTime();
+				System.out.println(Thread.currentThread().getName()+" CPU time: "+time);
+				System.out.println(Thread.currentThread().getName()+" Run Time "+(finishTime-startTime));
 				
-				
+				updateTextFile(time, finishTime-startTime,"src/RemoteProcedureClasses/Monitor_Server_CPU_Time.txt","src/RemoteProcedureClasses/Monitor_Server_RUN_Time.txt");
 			}
 		});
+		 monitorServer.setName("Host_MonitorServer_Thread");
 		monitorServer.start();
 	 }
-	
+	public void updateTextFile(Long cpuTime, long runTime, String fName1, String fName2) {
+
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(fName1,true));
+            bw.append(cpuTime.toString());
+            bw.newLine();
+            bw.close();
+            bw = new BufferedWriter(new FileWriter(fName2,true));
+            bw.append(Long.toString(runTime));
+            bw.newLine();
+            bw.close();
+        }catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 }

@@ -1,0 +1,44 @@
+Monitor Server Thread Execution Time Statistics:
+	Sample Size:45
+	Mean Time: 103 125 000 us 
+	Standard Deviation: 27 950 849.718747
+	90% CI: 103,125,000 ±6,854,166.667 (±6.65%)
+
+Monitor Client Thread Execution Time Statistics: 
+	Sample Size: 45
+	Mean Time:  117 361 111 us
+	Standard Deviation: 37 633 259.647444 us
+	90% CI: 117,361,111 ±9,228,507 (±7.86%) 
+
+Monitor Server Thread Response Time Statistics:
+
+	Sample Size: 45
+	Mean Time: 	234 217 484
+	Standard Deviation: 4 351 249 us
+	95% CI: 234,217,484 ±1,271,346 (±0.54%)
+
+Monitor Client Thread Response Time Statistics:
+
+	Sample Size: 45
+	Mean Time: 234 758 913 us
+	Standard Deviation: 4 320 204
+	95% CI: 234,758,913 ±1,262,275 (±0.54%)
+	
+As shown by the mean times for the two methods the ThreadMXBM Method run time is significantly
+less than the nanoTime() method (56% less for monitoring server and 50% less for  Client). This because
+the Response Time is different from the Thread CPU Time. Only one thread runs at a time on a single CPU,
+so the OS suspends threads to run other threads. Therefore, if only one CPU is used for the process
+the combined CPU Execution times of each thread will be less than the run time of either thread. 
+(103 125 000+117,361,111)<234,217,484.
+
+The preferred method is the ThreadMXBM method as it measures the Execution Time instead of the Response Time.
+The Response time is the total time required including the time the thread is suspended. Execution Time is
+the total time the Thread was running. So it gives a better idea of how efficient the code is and how much 
+time it takes on the CPU. 
+
+Time per Package: 103 125 000/4000 (1000 write requests, 1000 read and there responses) = 25 781.25 ns between server and host
+Time per Package: 117 361 111/4000 = 29 340 ns between client and host.
+It is difficult to estimate the time per package as the time is dependent on the size of package.
+The client for example sends a byte array of size 1000 but receives a byte array of size 4. To
+calculate I took the mean execution time of all packages and divided by the number of packages sent.
+Execution time was used for reason stated in the paragraph above.
